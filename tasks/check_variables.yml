@@ -1,0 +1,5 @@
+---
+- name: check mesos_masters
+  fail:
+    msg: Undefined variable mesos_masters
+  when: mesos_masters is undefined

@@ -1,0 +1,7 @@
+---
+- name: Assure mesos and zookeeper services started or stopped on Ubuntu 16.04
+  systemd: '{{ item }}'
+  with_items:
+    - { name: zookeeper, state: stopped }
+    - { name: mesos-master, state: stopped }
+    - { name: mesos-slave, state: restarted, enabled: yes }
