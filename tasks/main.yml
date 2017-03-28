@@ -39,6 +39,19 @@
     - 'echo docker,mesos > /etc/mesos-slave/containerizers'
     - 'echo 5mins > /etc/mesos-slave/executor_registration_timeout'
 
+- name: Check running weave
+  shell: systemctl status weave
+  register: weave_status
+  ignore_errors: yes
+  when: "'{{ ansible_distribution_version }}' == '16.04'"
+
+- name: Create docker_socket and executor_environment_variables
+  shell: "{{ item }}"
+  with_items:
+    - 'echo "/var/run/weave/weave.sock" > /etc/mesos-slave/docker_socket'
+    - 'echo "{\"DOCKER_HOST\": \"unix:///var/run/weave/weave.sock\"}" > /etc/mesos-slave/executor_environment_variables'
+  when: weave_status is defined and (weave_status.failed is undefined or weave_status.failed == false)
+
 - name: Configure zookeeper connection of mesos masters
   template:
     src: zk.j2
