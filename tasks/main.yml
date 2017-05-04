@@ -38,7 +38,7 @@
     - 'echo manual > /etc/init/mesos-master.override'
     - 'echo docker,mesos > /etc/mesos-slave/containerizers'
     - 'echo 5mins > /etc/mesos-slave/executor_registration_timeout'
-    - 'echo $(hostname -i) > /etc/mesos-slave/hostname'
+    - 'echo {{ ansible_host }} > /etc/mesos-slave/hostname'
 
 - name: Check running weave
   shell: systemctl status weave
