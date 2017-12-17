@@ -1,6 +1,6 @@
 ---
-- include: check_system.yml
-- include: check_variables.yml
+- import_tasks: check_system.yml
+- import_tasks: check_variables.yml
 
 - name: Add repository key
   apt_key:
@@ -8,10 +8,12 @@
     id: E56151BF
 
 - name: Add repository list
-  apt_repository: "{{ item }}"
+  apt_repository:
+    repo: "{{ item.repo }}"
+    filename: "{{ item.filename }}"
   with_items:
     - { repo: 'deb http://repos.mesosphere.com/ubuntu {{ ansible_distribution_release }} main', filename: mesosphere }
-    - { repo: 'ppa:webupd8team/java' }
+    - { repo: 'ppa:webupd8team/java', filename: java8 }
 
 - name: Set acceptance value before installing oracle java8
   debconf:
@@ -24,7 +26,7 @@
   include_vars: "vars_{{ ansible_distribution_release }}.yml"
   when: mesos_version is undefined or marathon_version is undefined
 
-- name: Install oralce-java8-installer and mesos
+- name: Install oracle-java8-installer and mesos
   apt: name={{ item }}
   with_items:
     - oracle-java8-installer
@@ -44,7 +46,7 @@
   shell: systemctl status weave
   register: weave_status
   ignore_errors: yes
-  when: "'{{ ansible_distribution_version }}' == '16.04'"
+  when: ansible_distribution_version == '16.04'
 
 - name: Create docker_socket and executor_environment_variables
   shell: "{{ item }}"
@@ -62,5 +64,5 @@
   shell: |
     cat /etc/hosts | grep "{{ ansible_host }}"
     if [ $? -ne 0 ]; then echo "{{ ansible_host }} $(hostname)" >> /etc/hosts; fi
-    
-- include: service_mgmt_{{ ansible_distribution_release }}.yml
+
+- include_tasks: service_mgmt_{{ ansible_distribution_release }}.yml
